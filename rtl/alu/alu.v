@@ -5,14 +5,15 @@ module alu (
     output reg [7:0] out,
     output reg z_flag,
     output reg c_flag,
-    output reg n_flag;
+    output reg n_flag
 );
     reg [8:0] tmp_result;
 
     always @(*) begin
         tmp_result = 9'b0;
         c_flag = 1'b0;
-        z_flag = 1'b0
+        z_flag = 1'b0;
+        n_flag = 1'b0;
 
         case (op)
         //ARITMETICS
@@ -63,10 +64,33 @@ module alu (
         4'b0111: begin //NOT A
             out = ~a;
         end
+        4'b1000: begin // SHL A
+            c_flag = a[7];
+            out = a<<1;
+        end
+        4'b1001: begin //SHR A
+            c_flag = a[0];
+            out = a>>1;
+        end
+        4'b1010: begin //ROL A
+            out = {a[6:0], a[7]};
+            c_flag = a[7];
+        end
+        4'b1011:begin //
+            out = a;
+            z_flag = (a==b);
+            c_flag = (a>b);
+            n_flag = (a<b);
+        end
+        4'b1100: begin //PASS_A
+            out= a;
+        end
+        4'b1101: begin // CLR
+            out = 0;
+        end
+        4'b1110: begin //HLT
+        end
         
-
-
-
         endcase
     end
 
