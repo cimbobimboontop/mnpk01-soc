@@ -41,14 +41,20 @@ module controlunit(
                         8'h01:   state <= S_COLLECT_REG;
                         8'h02:   state <= S_COLLECT_REG;
                         8'h03:   state <= S_COLLECT_REG;
+                        8'h04:   state <= S_COLLECT_REG;
+                        8'h05:   state <= S_COLLECT_DATA;
                         default: state <= S_FETCH;
                     endcase
                 end
                 S_COLLECT_REG: begin
                     pc_inc <=1;
                     case(op)
-                        8'h01:   state<= S_COLLECT_DATA;
+                        8'h01:   state <= S_COLLECT_DATA;
                         8'h02:   state <= S_COLLECT_REG2;
+                        8'h03:   state <= S_COLLECT_DATA;
+                        8'h04:   state <= S_COLLECT_DATA;
+                        
+                        default: state <= S_FETCH;
                     endcase
 
                 end
@@ -61,13 +67,21 @@ module controlunit(
                     case(op)
                         8'h01:   state<= S_FETCH;
                         8'h03:   state<= S_COLLECT_DATA2;
+                        8'h04:   state<= S_COLLECT_DATA2;
+                        8'h05:   state<= S_COLLECT_DATA2;
+                        
+                        
                     
                     endcase
 
                 end
                 S_COLLECT_DATA2: begin 
                     pc_inc <= 1;
-                    state <= S_FETCH;
+                    case(op)
+                        8'h05: state<= S_COLLECT_REG;
+                        default: state <= S_FETCH; 
+                endcase
+                    
                 end
 
             endcase

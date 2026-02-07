@@ -1,0 +1,6 @@
+8h0 = NOP                                   OK 
+8h01 = MVI  //Move immidiate 8-bit          OK 8h01 register_addr data
+8h02 = MOV  //Move                          OK 8h02 register_addr register_addr
+8h03 = MVIB //Move immidiate 16-bit         OK 8h03 register_addr data dadta
+8h04 = LOAD //Move from memory to register  OK 8H04 register_addr ram_addrL ram_addrH
+8h05 = STORE//Move from register to memory  OK 8h05 ram_addrL ram_addrH register_addr
