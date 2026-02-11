@@ -2,7 +2,12 @@ module controlunit(
     input clk,
     input rst,
     input [7:0] rom_data,
-    output reg pc_inc
+    output reg pc_inc,
+    output reg [3:0] reg_addr,
+    output reg write_reg_en,
+    output reg reg_passthrough
+    output reg reg_clk,
+    output reg [7:0] d_out
 );
 
     typedef enum reg [3:0] {
@@ -32,7 +37,6 @@ module controlunit(
                     op <= rom_data;
                     pc_inc <= 1;
                     state <= S_DECODE;
-
                 end
 
                 S_DECODE: begin
@@ -46,42 +50,41 @@ module controlunit(
                         default: state <= S_FETCH;
                     endcase
                 end
+
                 S_COLLECT_REG: begin
-                    pc_inc <=1;
+                    pc_inc <= 1;
+                    reg_addr = ir[3:0];
                     case(op)
                         8'h01:   state <= S_COLLECT_DATA;
                         8'h02:   state <= S_COLLECT_REG2;
                         8'h03:   state <= S_COLLECT_DATA;
                         8'h04:   state <= S_COLLECT_DATA;
-                        
                         default: state <= S_FETCH;
                     endcase
-
                 end
+
                 S_COLLECT_REG2: begin 
                     state <= S_FETCH;
                     pc_inc <= 1;
                 end
+
                 S_COLLECT_DATA: begin
                     pc_inc <= 1;
                     case(op)
-                        8'h01:   state<= S_FETCH;
-                        8'h03:   state<= S_COLLECT_DATA2;
-                        8'h04:   state<= S_COLLECT_DATA2;
-                        8'h05:   state<= S_COLLECT_DATA2;
-                        
-                        
-                    
+                        8'h01:   state <= S_FETCH;
+                        8'h03:   state <= S_COLLECT_DATA2;
+                        8'h04:   state <= S_COLLECT_DATA2;
+                        8'h05:   state <= S_COLLECT_DATA2;
+                        default: state <= S_FETCH;   // ← DOPLNENÉ
                     endcase
-
                 end
+
                 S_COLLECT_DATA2: begin 
                     pc_inc <= 1;
                     case(op)
-                        8'h05: state<= S_COLLECT_REG;
+                        8'h05: state <= S_COLLECT_REG;
                         default: state <= S_FETCH; 
-                endcase
-                    
+                    endcase
                 end
 
             endcase
