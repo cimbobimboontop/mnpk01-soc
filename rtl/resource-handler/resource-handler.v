@@ -1,8 +1,11 @@
 module resourcehandler(
     input [7:0] d_in,
+    input [7:0] reg_data,
     input reg_passthrough,
     input clk,
     input rst,
+    input [3:0] reg_addr_write,
+    input [3:0] reg_addr_read,
     output reg [7:0] reg_in
 );
 
