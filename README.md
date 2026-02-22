@@ -1,11 +1,11 @@
-# MNPK01-System: Full-Stack 8-bit RISC Microcomputer
+# MNPK01-System: Full-Stack 8-bitMicrocomputer
 
 ![Status](https://img.shields.io/badge/Status-Development-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-GPLv3-green?style=for-the-badge)
 ![Arch](https://img.shields.io/badge/Architecture-8--bit_RISC-blue?style=for-the-badge)
 
 ## 📌 Project Overview
-**MNPK01-System** is a high-performance 8-bit RISC microcomputer architecture, engineered from the silicon level up to the physical PCB. Developed as a comprehensive graduation thesis, this project bridges the gap between Hardware Description Languages (HDL) and physical hardware implementation.
+**MNPK01-System** is a 8-bit microcomputer architecture, engineered from the silicon level up to the physical PCB. Developed as a comprehensive graduation thesis, this project bridges the gap between Hardware Description Languages (HDL) and physical hardware implementation.
 
 The core mission of the MNPK01 is to demonstrate a **complete vertical integration** of computer systems: from logical gate synthesis and custom Instruction Set Architecture (ISA) to physical PCB fabrication and low-level firmware optimization.
 
