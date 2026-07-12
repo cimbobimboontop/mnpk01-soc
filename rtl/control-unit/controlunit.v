@@ -1,94 +1,81 @@
-module controlunit(
+`define OP_NOP   8'h00
+`define OP_MVI   8'h01
+`define OP_MOV   8'h02
+`define OP_MVIB  8'h03
+`define OP_LOAD  8'h04
+`define OP_STORE 8'h05
+
+module controlunit (
     input clk,
     input rst,
     input [7:0] rom_data,
     output reg pc_inc,
-    output reg [3:0] reg_addr,
     output reg write_reg_en,
-    output reg reg_passthrough
-    output reg reg_clk,
-    output reg [7:0] d_out
+    output reg [3:0] reg_addr,
+    output reg write_temp_from_reg,
+    output reg high_b
 );
 
-    typedef enum reg [3:0] {
-        S_FETCH  = 4'b0000,
-        S_DECODE = 4'b0001,
-        S_COLLECT_REG = 4'b0010,
-        S_COLLECT_REG2 = 4'b0011,
-        S_COLLECT_DATA = 4'b0100,
-        S_COLLECT_DATA2 = 4'b0101
-    } state_t;
+    reg [3:0] bytes_to_fetch;
 
+    // 3 stavy pre flexibilné načítavanie viacbajtových inštrukcií
+    typedef enum reg [1:0] {
+        S_FETCH   = 2'b00,
+        S_DECODE  = 2'b01,
+        S_COLLECT = 2'b10
+    } state_t;
+    
     state_t state;
     reg [7:0] ir;
-    reg [7:0] op;
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            state <= S_FETCH;
-            pc_inc <= 0;
-            ir <= 8'h00;
+            state               <= S_FETCH;
+            ir                  <= 8'h00;
+            bytes_to_fetch      <= 0;
+            pc_inc              <= 0;
+            write_reg_en        <= 0;
+            reg_addr            <= 4'h0;
+            write_temp_from_reg <= 0;
+            high_b              <= 0;
         end else begin
-            pc_inc <= 0; 
+            // Predvolené (default) hodnoty, aby nevznikali latche
+            pc_inc       <= 0;
+            write_reg_en <= 0;
 
             case (state)
-                S_FETCH: begin
-                    ir <= rom_data;
-                    op <= rom_data;
-                    pc_inc <= 1;
-                    state <= S_DECODE;
+                S_FETCH: begin  
+                    ir             <= rom_data;  
+                    state          <= S_DECODE;
+                    bytes_to_fetch <= 0;
                 end
-
-                S_DECODE: begin
-                    case (ir)
-                        8'h00:   state <= S_FETCH;
-                        8'h01:   state <= S_COLLECT_REG;
-                        8'h02:   state <= S_COLLECT_REG;
-                        8'h03:   state <= S_COLLECT_REG;
-                        8'h04:   state <= S_COLLECT_REG;
-                        8'h05:   state <= S_COLLECT_DATA;
-                        default: state <= S_FETCH;
-                    endcase
+                
+                S_DECODE: begin  
+                    if (ir == `OP_MVI) begin
+                        state          <= S_COLLECT;
+                        bytes_to_fetch <= 2; // MVI potrebuje 2 ďalšie bajty (registre a dáta)
+                    end else begin
+                        state <= S_FETCH;    // NOP alebo neznáma inštrukcia -> reštart cyklu
+                    end
                 end
-
-                S_COLLECT_REG: begin
-                    pc_inc <= 1;
-                    reg_addr = ir[3:0];
-                    case(op)
-                        8'h01:   state <= S_COLLECT_DATA;
-                        8'h02:   state <= S_COLLECT_REG2;
-                        8'h03:   state <= S_COLLECT_DATA;
-                        8'h04:   state <= S_COLLECT_DATA;
-                        default: state <= S_FETCH;
-                    endcase
+                
+                S_COLLECT: begin
+                    if (ir == `OP_MVI && bytes_to_fetch == 2) begin
+                        bytes_to_fetch <= bytes_to_fetch - 1'b1;
+                        pc_inc         <= 1;
+                        reg_addr       <= rom_data[3:0]; // Uložíme cieľový register
+                        state          <= S_COLLECT;
+                    end
+                    else if (ir == `OP_MVI && bytes_to_fetch == 1) begin
+                        pc_inc       <= 1;
+                        write_reg_en <= 1; // Zapneme zápis na konci inštrukcie
+                        state        <= S_FETCH;   // Inštrukcia hotová, ideme na ďalšiu
+                    end
                 end
-
-                S_COLLECT_REG2: begin 
-                    state <= S_FETCH;
-                    pc_inc <= 1;
-                end
-
-                S_COLLECT_DATA: begin
-                    pc_inc <= 1;
-                    case(op)
-                        8'h01:   state <= S_FETCH;
-                        8'h03:   state <= S_COLLECT_DATA2;
-                        8'h04:   state <= S_COLLECT_DATA2;
-                        8'h05:   state <= S_COLLECT_DATA2;
-                        default: state <= S_FETCH;   // ← DOPLNENÉ
-                    endcase
-                end
-
-                S_COLLECT_DATA2: begin 
-                    pc_inc <= 1;
-                    case(op)
-                        8'h05: state <= S_COLLECT_REG;
-                        default: state <= S_FETCH; 
-                    endcase
-                end
-
+                
+                default: state <= S_FETCH;
             endcase
         end
     end
-
+     
 endmodule
