@@ -1,4 +1,4 @@
-# MNPK01-System: Full-Stack 8-bit RISC Microcomputer
+# MNPK01-System: Full-Stack 8-bit Microcomputer
 
 ![Status](https://img.shields.io/badge/Status-Development-orange?style=for-the-badge)
 ![License](https://img.shields.io/badge/License-GPLv3-green?style=for-the-badge)
