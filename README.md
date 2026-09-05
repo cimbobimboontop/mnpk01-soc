@@ -23,11 +23,15 @@ graph TD
     classDef compute fill:#ef476f,stroke:#000,stroke-width:2px,color:#fff;
     classDef routing fill:#118ab2,stroke:#000,stroke-width:2px,color:#fff;
 
-    subgraph Instruction_Fetch [Instruction Fetch Unit]
-        PC[Program Counter] -->|16-bit Address| ROM[ROM - Instructions]
+    subgraph Boot_Configuration [Boot Storage]
+        FLASH[SPI Flash - External] -.->|Boot / Load| BRAM[FPGA Memory / BRAM]
     end
 
-    ROM -->|8-bit Opcode| CU[CONTROL UNIT]
+    subgraph Instruction_Fetch [Instruction Fetch Unit]
+        PC[Program Counter] -->|16-bit Address| BRAM
+    end
+
+    BRAM -->|16-bit Instruction| CU[CONTROL UNIT]
 
     subgraph Execution_Core [Processing Core]
         RH[RESOURCE HANDLER / BUS]
@@ -51,6 +55,6 @@ graph TD
 
     %% Applying Styles
     class CU control;
-    class ROM,RAM,REGS storage;
+    class FLASH,BRAM,RAM,REGS storage;
     class ALU compute;
     class RH,PC routing;
